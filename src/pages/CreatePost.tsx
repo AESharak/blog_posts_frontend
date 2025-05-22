@@ -32,17 +32,40 @@ const CreatePost: React.FC = () => {
 
     try {
       setIsLoading(true);
+      console.log("Submitting form data:", data);
       const response = await blogAPI.createPost(data);
       toast.success("Post created successfully!");
       navigate(`/blog/${response.slug}`);
     } catch (error: unknown) {
-      console.error(error);
+      console.error("Create post error:", error);
       let errorMessage = "Failed to create post. Please try again.";
 
       if (error && typeof error === "object" && "response" in error) {
-        const errorObj = error as { response?: { data?: { detail?: string } } };
-        if (errorObj.response?.data?.detail) {
-          errorMessage = errorObj.response.data.detail;
+        const errorObj = error as {
+          response?: { data?: { detail?: string; [key: string]: unknown } };
+        };
+        console.error("Error response:", errorObj.response);
+
+        if (errorObj.response?.data) {
+          console.error("Error data:", errorObj.response.data);
+
+          if (errorObj.response.data.detail) {
+            errorMessage = errorObj.response.data.detail;
+          } else {
+            // Handle field-specific errors
+            const fieldErrors = Object.entries(errorObj.response.data)
+              .map(
+                ([field, errors]) =>
+                  `${field}: ${
+                    Array.isArray(errors) ? errors.join(", ") : errors
+                  }`
+              )
+              .join("; ");
+
+            if (fieldErrors) {
+              errorMessage = `Validation errors: ${fieldErrors}`;
+            }
+          }
         }
       }
 

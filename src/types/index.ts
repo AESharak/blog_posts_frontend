@@ -42,6 +42,6 @@ export interface BlogPostFormData {
   title: string;
   body: string;
   image_url?: string;
-  image?: File;
+  image?: File | FileList;
   author_id: number;
 }

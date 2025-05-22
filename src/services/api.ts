@@ -77,8 +77,10 @@ export const blogAPI = {
   },
 
   createPost: async (data: BlogPostFormData): Promise<BlogPost> => {
+    console.log("Creating post with data:", data);
     // Handle file uploads
     if (data.image) {
+      console.log("Handling image upload");
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("body", data.body);
@@ -88,18 +90,47 @@ export const blogAPI = {
         formData.append("image_url", data.image_url);
       }
 
-      formData.append("image", data.image);
+      // Use the first file from FileList instead of the whole FileList
+      if (data.image instanceof FileList && data.image.length > 0) {
+        formData.append("image", data.image[0]);
+      } else if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
 
-      const response = await api.post("/blog/posts/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      return response.data;
+      try {
+        const response = await api.post("/blog/posts/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log("Post created successfully:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error creating post with image:", error);
+        if (error && typeof error === "object" && "response" in error) {
+          console.error(
+            "Error response data:",
+            (error as { response?: { data?: unknown } }).response?.data
+          );
+        }
+        throw error;
+      }
     } else {
-      const response = await api.post("/blog/posts/", data);
-      return response.data;
+      try {
+        console.log("Sending JSON data for post creation");
+        const response = await api.post("/blog/posts/", data);
+        console.log("Post created successfully:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error creating post:", error);
+        if (error && typeof error === "object" && "response" in error) {
+          console.error(
+            "Error response data:",
+            (error as { response?: { data?: unknown } }).response?.data
+          );
+        }
+        throw error;
+      }
     }
   },
 
@@ -116,8 +147,6 @@ export const blogAPI = {
       if (data.author_id)
         formData.append("author_id", data.author_id.toString());
       if (data.image_url) formData.append("image_url", data.image_url);
-
-      formData.append("image", data.image);
 
       const response = await api.put(`/blog/posts/${slug}/`, formData, {
         headers: {
