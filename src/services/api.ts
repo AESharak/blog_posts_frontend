@@ -46,7 +46,14 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     const refresh = localStorage.getItem("refresh_token");
-    await api.post("/auth/logout/", { refresh });
+    if (refresh) {
+      try {
+        await api.post("/auth/logout/", { refresh_token: refresh });
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    // Always clear local storage even if API call fails
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
   },
@@ -60,6 +67,7 @@ export const authAPI = {
     const refresh = localStorage.getItem("refresh_token");
     const response = await api.post("/auth/token/refresh/", { refresh });
     localStorage.setItem("access_token", response.data.access);
+    localStorage.setItem("refresh_token", response.data.refresh);
     return response.data;
   },
 };
