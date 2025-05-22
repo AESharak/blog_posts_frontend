@@ -138,26 +138,50 @@ export const blogAPI = {
     slug: string,
     data: Partial<BlogPostFormData>
   ): Promise<BlogPost> => {
-    // Handle file uploads
+    // Create FormData for any update case
+    const formData = new FormData();
+
+    // Append basic fields if they exist
+    if (data.title) formData.append("title", data.title);
+    if (data.body) formData.append("body", data.body);
+    if (data.author_id) formData.append("author_id", data.author_id.toString());
+
+    // Handle image upload
     if (data.image) {
-      const formData = new FormData();
+      // Use the first file from FileList instead of the whole FileList
+      if (data.image instanceof FileList && data.image.length > 0) {
+        formData.append("image", data.image[0]);
+      } else if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+    }
 
-      if (data.title) formData.append("title", data.title);
-      if (data.body) formData.append("body", data.body);
-      if (data.author_id)
-        formData.append("author_id", data.author_id.toString());
-      if (data.image_url) formData.append("image_url", data.image_url);
+    // Handle image URL
+    if (data.image_url) {
+      formData.append("image_url", data.image_url);
+    }
 
+    // Handle image removal - explicit flag to remove the image
+    if (data.remove_image) {
+      formData.append("remove_image", "true");
+    }
+
+    try {
       const response = await api.put(`/blog/posts/${slug}/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
       return response.data;
-    } else {
-      const response = await api.put(`/blog/posts/${slug}/`, data);
-      return response.data;
+    } catch (error) {
+      console.error("Error updating post:", error);
+      if (error && typeof error === "object" && "response" in error) {
+        console.error(
+          "Error response data:",
+          (error as { response?: { data?: unknown } }).response?.data
+        );
+      }
+      throw error;
     }
   },
 

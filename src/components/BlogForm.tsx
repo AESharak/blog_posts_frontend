@@ -18,18 +18,21 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(
     initialData?.image || initialData?.image_url || null
   );
+  const [removeImage, setRemoveImage] = useState<boolean>(false);
 
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
+    setValue,
   } = useForm<BlogPostFormData>({
     defaultValues: {
       title: initialData?.title || "",
       body: initialData?.body || "",
       image_url: initialData?.image_url || "",
       author_id: user?.id || 0,
+      remove_image: false,
     },
   });
 
@@ -42,6 +45,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
+        setRemoveImage(false);
       };
       reader.readAsDataURL(file);
     }
@@ -49,14 +53,27 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
   // Handle image URL change
   React.useEffect(() => {
-    if (imageUrl && !previewImage) {
+    if (imageUrl && !previewImage && !removeImage) {
       setPreviewImage(imageUrl);
     }
-  }, [imageUrl, previewImage]);
+  }, [imageUrl, previewImage, removeImage]);
+
+  // Handle image removal
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    setRemoveImage(true);
+    setValue("image", undefined);
+    setValue("image_url", "");
+    setValue("remove_image", true);
+  };
 
   const handleFormSubmit = async (data: BlogPostFormData) => {
     if (user?.id) {
       data.author_id = user.id;
+      // Set remove_image flag if needed
+      if (removeImage) {
+        data.remove_image = true;
+      }
       await onSubmit(data);
     }
   };
@@ -121,8 +138,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
         <input
           id="image_url"
           type="text"
+          disabled={removeImage}
           {...register("image_url")}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
         />
       </div>
 
@@ -137,18 +155,28 @@ const BlogForm: React.FC<BlogFormProps> = ({
           id="image"
           type="file"
           accept="image/*"
+          disabled={removeImage}
           {...register("image", {
             onChange: handleFileChange,
           })}
-          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
         />
       </div>
 
       {previewImage && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Image Preview
-          </label>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label className="block text-sm font-medium text-gray-700">
+              Image Preview
+            </label>
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="text-sm text-red-600 hover:text-red-800"
+            >
+              Remove Image
+            </button>
+          </div>
           <div className="h-64 w-full relative overflow-hidden rounded-lg">
             <img
               src={previewImage}
@@ -157,6 +185,14 @@ const BlogForm: React.FC<BlogFormProps> = ({
               onError={() => setPreviewImage(null)}
             />
           </div>
+        </div>
+      )}
+
+      {removeImage && (
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm text-yellow-700">
+            The image will be removed when you save this post.
+          </p>
         </div>
       )}
 

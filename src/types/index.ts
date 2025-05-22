@@ -44,4 +44,5 @@ export interface BlogPostFormData {
   image_url?: string;
   image?: File | FileList;
   author_id: number;
+  remove_image?: boolean;
 }
