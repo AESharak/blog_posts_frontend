@@ -1,26 +1,27 @@
-# Blog App Frontend (Vite)
+# Blog Application Frontend
 
-This is the frontend for the Blog App, built with React, TypeScript, and Vite.
+This is the frontend for a fullstack blog application built with React, TypeScript, and Vite.
 
 ## Features
 
 - User authentication (login, register, logout)
-- View blog posts
+- View blog posts with pagination
 - Create, edit, and delete blog posts
-- Protected routes for authenticated users
+- Rich text editing for blog content
 - Responsive design with TailwindCSS
+- Real-time form validation
 
 ## Tech Stack
 
 - React 19
 - TypeScript
-- Vite
-- TailwindCSS
-- React Router DOM
-- React Query
-- Axios
-- React Hook Form
-- React Hot Toast
+- Vite 6
+- TailwindCSS 3
+- React Router DOM 7
+- React Query (Tanstack Query)
+- Axios for API requests
+- React Hook Form for form management
+- React Hot Toast for notifications
 
 ## Getting Started
 
@@ -28,17 +29,29 @@ This is the frontend for the Blog App, built with React, TypeScript, and Vite.
 
 - Node.js (v18 or later)
 - npm or yarn
+- Backend API running (see backend README)
 
 ### Installation
 
 1. Clone the repository
-2. Navigate to the frontend-vite directory
-3. Install dependencies:
+
+```bash
+git clone https://github.com/yourusername/blog_post_react_django.git
+cd blog_post_react_django/frontend
+```
+
+2. Install dependencies
 
 ```bash
 npm install
 # or
-yarn
+yarn install
+```
+
+3. Create a `.env` file in the frontend directory with the following content
+
+```
+VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
 ### Development
@@ -51,7 +64,7 @@ npm run dev
 yarn dev
 ```
 
-This will start the development server at http://localhost:3000.
+This will start the development server at http://localhost:5173.
 
 ### Building for Production
 
@@ -78,23 +91,39 @@ yarn preview
 ## Project Structure
 
 ```
-frontend-vite/
-├── public/            # Static assets
+frontend/
+├── public/              # Static assets
 ├── src/
-│   ├── components/    # Reusable components
-│   ├── contexts/      # React contexts
-│   ├── pages/         # Page components
-│   ├── services/      # API services
-│   ├── types/         # TypeScript types
-│   ├── App.tsx        # Main App component
-│   ├── main.tsx       # Entry point
-│   └── index.css      # Global styles
-├── index.html         # HTML template
-├── tsconfig.json      # TypeScript configuration
-├── vite.config.ts     # Vite configuration
-└── package.json       # Project dependencies
+│   ├── assets/          # Images and other assets
+│   ├── components/      # Reusable UI components
+│   ├── contexts/        # React contexts (auth, theme)
+│   ├── pages/           # Page components
+│   ├── services/        # API services
+│   ├── types/           # TypeScript type definitions
+│   ├── App.tsx          # Main App component
+│   └── main.tsx         # Application entry point
+├── index.html           # HTML template
+├── tailwind.css         # TailwindCSS entry
+├── tailwind.config.js   # TailwindCSS configuration
+├── tsconfig.json        # TypeScript configuration
+├── vite.config.ts       # Vite configuration
+└── package.json         # Project dependencies
 ```
 
 ## API Integration
 
-The frontend communicates with a Django backend API. See the API documentation for more details.
+The frontend communicates with a Django REST API backend. Configure the API URL in your `.env` file to ensure proper connectivity.
+
+## Development Workflow
+
+1. Start the backend server (see backend README)
+2. Start the frontend development server
+3. Make changes to the code
+4. The changes will be reflected immediately thanks to Hot Module Replacement
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Lint the codebase
