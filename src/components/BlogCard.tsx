@@ -1,7 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import type { BlogPost } from "../types";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaRegClock,
+  FaRegUser,
+  FaArrowRight,
+} from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import type { IconType } from "react-icons";
 
@@ -43,47 +49,79 @@ const BlogCard: React.FC<BlogCardProps> = ({
     }).format(date);
   };
 
+  // Get a snippet of the post body with a word limit
+  const getBodySnippet = (text: string, wordLimit = 20) => {
+    const words = text.split(/\s+/);
+    if (words.length <= wordLimit) return text;
+    return words.slice(0, wordLimit).join(" ") + "...";
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      {post.image || post.image_url ? (
-        <div className="h-48 bg-gray-200 relative overflow-hidden">
+    <article className="card group transition-all duration-300 flex flex-col h-full">
+      <div className="relative aspect-video overflow-hidden">
+        {post.image || post.image_url ? (
           <img
             src={post.image || post.image_url}
             alt={post.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-        </div>
-      ) : (
-        <div className="h-48 bg-gray-100 flex items-center justify-center">
-          <span className="text-gray-400 text-lg">No image</span>
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full bg-secondary-100 flex items-center justify-center">
+            <span className="text-secondary-400 text-lg">No image</span>
+          </div>
+        )}
 
-      <div className="p-6">
-        <Link to={`/blog/${post.slug}`}>
-          <h2 className="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors duration-200">
+        {/* Category tag could go here */}
+        <div className="absolute top-4 left-4">
+          <span className="bg-primary-600/90 text-white text-xs font-medium px-2.5 py-1 rounded-md">
+            Blog
+          </span>
+        </div>
+      </div>
+
+      <div className="p-6 flex flex-col flex-grow">
+        {/* Meta info */}
+        <div className="flex items-center text-xs text-secondary-500 mb-3 space-x-4">
+          <div className="flex items-center">
+            <FaRegClock className="mr-1" />
+            <span>{formatDate(post.created_at)}</span>
+          </div>
+          <div className="flex items-center">
+            <FaRegUser className="mr-1" />
+            <span>{isAuthor ? "You" : post.author.username}</span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <Link
+          to={`/blog/${post.slug}`}
+          className="group-hover:text-primary-600 transition-colors"
+        >
+          <h2 className="font-serif font-bold text-xl mb-3 text-secondary-900 line-clamp-2">
             {post.title}
           </h2>
         </Link>
 
-        <p className="text-gray-600 mb-4">
-          {post.body.substring(0, 150)}
-          {post.body.length > 150 ? "..." : ""}
+        {/* Excerpt */}
+        <p className="text-secondary-600 line-clamp-3 mb-5">
+          {getBodySnippet(post.body)}
         </p>
 
-        <div className="flex items-center justify-between mt-4">
-          <div className="text-sm text-gray-500">
-            <span>Written by: {isAuthor ? "you" : post.author.username}</span>
-            <div className="text-xs text-gray-400 mt-1">
-              {formatDate(post.created_at)}
-            </div>
-          </div>
+        {/* Action area */}
+        <div className="mt-auto pt-4 flex items-center justify-between border-t border-secondary-100">
+          <Link
+            to={`/blog/${post.slug}`}
+            className="text-primary-600 hover:text-primary-700 font-medium inline-flex items-center"
+          >
+            Read more
+            <FaArrowRight className="ml-1.5 text-xs" />
+          </Link>
 
           {showControls && isAuthor && (
             <div className="flex space-x-2">
               <Link
                 to={`/edit/${post.slug}`}
-                className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors duration-200"
+                className="p-2 bg-primary-50 text-primary-600 rounded-full hover:bg-primary-100 transition-colors"
                 aria-label="Edit post"
               >
                 <Icon icon={FaEdit} />
@@ -93,7 +131,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 onKeyDown={handleKeyDown}
                 tabIndex={0}
                 aria-label="Delete post"
-                className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors duration-200"
+                className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-colors"
               >
                 <Icon icon={FaTrash} />
               </button>
@@ -101,7 +139,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 
