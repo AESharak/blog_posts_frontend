@@ -8,7 +8,13 @@ import { blogAPI } from "../services/api";
 import type { BlogPost } from "../types";
 import { useInView } from "react-intersection-observer";
 import { useAuth } from "../contexts/AuthContext";
-import { FaSearch, FaPen, FaLayerGroup, FaSpinner } from "react-icons/fa";
+import {
+  FaSearch,
+  FaPen,
+  FaLayerGroup,
+  FaSpinner,
+  FaPlus,
+} from "react-icons/fa";
 
 const Home: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -209,6 +215,18 @@ const Home: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Floating Action Button - Create Post */}
+      {isAuthenticated && (
+        <Link
+          to="/create"
+          className="fixed bottom-6 right-6 bg-primary-500 hover:bg-primary-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 z-50"
+          aria-label="Create new post"
+          title="Create new post"
+        >
+          <FaPlus className="text-lg" />
+        </Link>
+      )}
     </Layout>
   );
 };
